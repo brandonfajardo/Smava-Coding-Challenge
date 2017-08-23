@@ -22,7 +22,6 @@ const register = (state = initialState, action) => {
                 bankName: ''
             }
         case INPUT_CHANGE:
-            console.log(action.item.event.target.value)
             return {
                 ...state,
                 [action.item.select]: action.item.event.target.value

@@ -1,10 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { 
-    toggleAddBankAccount, 
-    inputChange,
-    updateError 
-} from '../actions'
+import { toggleAddBankAccount, inputChange, updateError } from '../actions'
 import BankForm from './bankForm'
 import IBAN from 'iban'
 
@@ -25,6 +21,9 @@ const styles = {
     ErrorMessage: {
         textAlign: 'center',
         color: '#ff6666'
+    },
+    AddBankButton: {
+        textAlign: 'center'
     }
 }
 
@@ -42,7 +41,7 @@ class RegisterForm extends Component {
 
     renderAddBankAccountButton() {
         return (
-            <div style={{textAlign: 'center'}}>
+            <div style={styles.AddBankButton}>
                 <button onClick={this.addBankAccount} className="btn btn-default">+ Add bank account</button>
             </div>
         )
@@ -67,7 +66,7 @@ class RegisterForm extends Component {
             }
         }
 
-        const fieldList = [
+        const fields = [
             {field: 'First Name', valid: isValid(this.props.firstNameInputVal, /^[A-Za-z]*$/)},
             {field: 'Last Name', valid: isValid(this.props.lastNameInputVal, /^[A-Za-z]*$/)},
             {field: 'Email', valid: isValid(this.props.emailInputVal, /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/)},
@@ -75,7 +74,7 @@ class RegisterForm extends Component {
             {field: 'Bank Name', valid: isValid(this.props.bankNameInputVal)}
         ]
 
-        const notValid = fieldList.filter((field) => {
+        const invalidFields = fields.filter((field) => {
             if (!field.valid){
                 return true
             }
@@ -83,8 +82,8 @@ class RegisterForm extends Component {
 
         if (!this.props.addingBankAccount || (!this.props.ibanInputVal.length && !this.props.bankNameInputVal)){
             this.props.updateError('You should provide at least one bank account')
-        } else if (notValid.length > 0){
-            this.props.updateError(`${notValid.toString()} is not valid`)
+        } else if (invalidFields.length > 0){
+            this.props.updateError(`${invalidFields.toString()} is not valid`)
         } else {
             alert(`
             Form data:
@@ -131,9 +130,7 @@ class RegisterForm extends Component {
                         className="form-control" 
                     />
                 </div>
-
-                <h4 style={styles.BankTitle}>Bank Accounts</h4>
-
+                <h4 style={styles.BankTitle}>Bank Account</h4>
                 {this.props.errorMessage && this.renderErrorMessage()}
                 {!this.props.addingBankAccount && this.renderAddBankAccountButton()}
                 {this.props.addingBankAccount && (
@@ -147,7 +144,6 @@ class RegisterForm extends Component {
                     />
                 )}
                 {this.props.addingBankAccount && this.renderAddBankAccountButton()}
-
                 <div style={styles.SubmitButton}>
                     <button onClick={this.submitForm} className="btn btn-warning">Submit!</button>
                 </div>   
@@ -156,18 +152,16 @@ class RegisterForm extends Component {
     }
 }
 
-const mapStateToProps = (state) => {
-    return {
-        addingBankAccount: state.register.addingBankAccount,
-        firstNameInputVal: state.register.firstName,
-        lastNameInputVal: state.register.lastName,
-        emailInputVal: state.register.email,
-        ibanInputVal: state.register.iban,
-        bankNameInputVal: state.register.bankName,
-        bankAccountsToAdd: state.register.bankAccountsToAdd,
-        errorMessage: state.register.errorMessage
-    }
-}
+const mapStateToProps = (state) => ({
+    addingBankAccount: state.register.addingBankAccount,
+    firstNameInputVal: state.register.firstName,
+    lastNameInputVal: state.register.lastName,
+    emailInputVal: state.register.email,
+    ibanInputVal: state.register.iban,
+    bankNameInputVal: state.register.bankName,
+    bankAccountsToAdd: state.register.bankAccountsToAdd,
+    errorMessage: state.register.errorMessage
+})
 
 const mapDispatchToProps = {
     toggleAddBankAccount,
