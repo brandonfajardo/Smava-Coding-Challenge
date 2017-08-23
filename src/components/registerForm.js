@@ -1,10 +1,12 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { 
-    addBankAccount, 
-    inputChange 
+    toggleAddBankAccount, 
+    inputChange,
+    updateError 
 } from '../actions'
 import BankForm from './bankForm'
+import IBAN from 'iban'
 
 const styles = {
     Title: {
@@ -19,6 +21,10 @@ const styles = {
     },
     BankTitle: {
         marginBottom: '15px'
+    },
+    ErrorMessage: {
+        textAlign: 'center',
+        color: '#ff6666'
     }
 }
 
@@ -27,10 +33,11 @@ class RegisterForm extends Component {
         super(props)
 
         this.addBankAccount = this.addBankAccount.bind(this)
+        this.submitForm = this.submitForm.bind(this)
     }
 
     addBankAccount (){
-        this.props.addBankAccount()
+        this.props.toggleAddBankAccount()
     }
 
     renderAddBankAccountButton() {
@@ -41,10 +48,61 @@ class RegisterForm extends Component {
         )
     }
 
+    renderErrorMessage() {
+        return <p style={styles.ErrorMessage}>{this.props.errorMessage}</p>
+    }
+
     onInputChange(event, select) {
         this.props.inputChange({ event, select })
     }
 
+    submitForm() {
+        const isValid = (input, regex) => {
+            if (input.length !== 0 && input.match(regex)){
+                return true
+            } else if (input.length !== 0){
+                return true
+            } else {
+                return false
+            }
+        }
+
+        const fieldList = [
+            {field: 'First Name', valid: isValid(this.props.firstNameInputVal, /^[A-Za-z]*$/)},
+            {field: 'Last Name', valid: isValid(this.props.lastNameInputVal, /^[A-Za-z]*$/)},
+            {field: 'Email', valid: isValid(this.props.emailInputVal, /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/)},
+            {field: 'IBAN', valid: IBAN.isValid(this.props.ibanInputVal)},
+            {field: 'Bank Name', valid: isValid(this.props.bankNameInputVal)}
+        ]
+
+        const notValid = fieldList.filter((field) => {
+            if (!field.valid){
+                return true
+            }
+        }).map((input) => input.field)
+
+        if (!this.props.addingBankAccount || (!this.props.ibanInputVal.length && !this.props.bankNameInputVal)){
+            this.props.updateError('You should provide at least one bank account')
+        } else if (notValid.length > 0){
+            this.props.updateError(`${notValid.toString()} is not valid`)
+        } else {
+            alert(`
+            Form data:
+            {
+                "firstName": "${this.props.firstNameInputVal}",
+                "lastName": "${this.props.lastNameInputVal}",
+                "email": "${this.props.emailInputVal}",
+                "bankAccounts": [
+                    {
+                        "iban": "${this.props.ibanInputVal}",
+                        "bankName": "${this.props.bankNameInputVal}"
+                    }
+                ]
+            }
+            `)
+        }
+    }
+    
     render() {
         return (
             <div>
@@ -76,30 +134,45 @@ class RegisterForm extends Component {
 
                 <h4 style={styles.BankTitle}>Bank Accounts</h4>
 
+                {this.props.errorMessage && this.renderErrorMessage()}
                 {!this.props.addingBankAccount && this.renderAddBankAccountButton()}
-
-                {this.props.addingBankAccount && <BankForm />}
-
+                {this.props.addingBankAccount && (
+                    <BankForm 
+                        toggleAddBankAccount={this.props.toggleAddBankAccount}
+                        inputChange={this.props.inputChange}
+                        inputValue={{
+                            iban: this.props.ibanInputVal,
+                            bankName: this.props.bankNameInputVal
+                        }}
+                    />
+                )}
                 {this.props.addingBankAccount && this.renderAddBankAccountButton()}
 
                 <div style={styles.SubmitButton}>
-                    <button className="btn btn-warning">Submit!</button>
+                    <button onClick={this.submitForm} className="btn btn-warning">Submit!</button>
                 </div>   
             </div>
         )
     }
 }
 
-const mapStateToProps = (state) => ({
-    addingBankAccount: state.register.addingBankAccount,
-    firstNameInputVal: state.register.firstName,
-    lastNameInputVal: state.register.lastNameInputVal,
-    emailInputVal: state.register.emailInputVal,
-})
+const mapStateToProps = (state) => {
+    return {
+        addingBankAccount: state.register.addingBankAccount,
+        firstNameInputVal: state.register.firstName,
+        lastNameInputVal: state.register.lastName,
+        emailInputVal: state.register.email,
+        ibanInputVal: state.register.iban,
+        bankNameInputVal: state.register.bankName,
+        bankAccountsToAdd: state.register.bankAccountsToAdd,
+        errorMessage: state.register.errorMessage
+    }
+}
 
 const mapDispatchToProps = {
-    addBankAccount,
-    inputChange
+    toggleAddBankAccount,
+    inputChange,
+    updateError
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(RegisterForm)
