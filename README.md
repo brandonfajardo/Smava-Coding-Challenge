@@ -3,3 +3,4 @@
 * Ability to add multiple bank accounts
 
 * Given more time I would be able to complete the application. Just minor state adjustments.
+* Setup - Clone/download, npm install, npm start, localhost:8080
