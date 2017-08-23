@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { addBankAccount } from '../actions'
+import { 
+    addBankAccount, 
+    inputChange 
+} from '../actions'
 import BankForm from './bankForm'
 
 const styles = {
@@ -38,21 +41,37 @@ class RegisterForm extends Component {
         )
     }
 
+    onInputChange(event, select) {
+        this.props.inputChange({ event, select })
+    }
+
     render() {
         return (
             <div>
                 <h1 style={styles.Title}>Register Account</h1>
                 <div style={styles.InputContainer}>
                     <h6>First name</h6>
-                    <input className="form-control" />
+                    <input
+                        value={this.props.firstNameInputVal}
+                        onChange={(e) => this.onInputChange(e, "firstName")} 
+                        className="form-control" 
+                    />
                 </div>
                 <div style={styles.InputContainer}>
                     <h6>Last name</h6>
-                    <input className="form-control" />
+                    <input
+                        value={this.props.lastNameInputVal}
+                        onChange={(e) => this.onInputChange(e, "lastName")} 
+                        className="form-control" 
+                    />
                 </div>
                 <div style={styles.InputContainer}>
                     <h6>Email</h6>
-                    <input className="form-control" />
+                    <input
+                        value={this.props.email}
+                        onChange={(e) => this.onInputChange(e, "email")} 
+                        className="form-control" 
+                    />
                 </div>
 
                 <h4 style={styles.BankTitle}>Bank Accounts</h4>
@@ -72,11 +91,15 @@ class RegisterForm extends Component {
 }
 
 const mapStateToProps = (state) => ({
-    addingBankAccount: state.register.addingBankAccount
+    addingBankAccount: state.register.addingBankAccount,
+    firstNameInputVal: state.register.firstName,
+    lastNameInputVal: state.register.lastNameInputVal,
+    emailInputVal: state.register.emailInputVal,
 })
 
 const mapDispatchToProps = {
-    addBankAccount
+    addBankAccount,
+    inputChange
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(RegisterForm)
